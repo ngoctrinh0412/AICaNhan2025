@@ -1,4 +1,6 @@
-# D? �n AI c� nh�n 
-## Hu?ng d?n c�i d?t v� ch?y 
-- C�i d?t: `pip install pygame` (n?u `gui.py` d�ng Pygame). 
-- Ch?y: `python gui.py` 
+# Đồ án AI cá nhân
+
+## Hướng dẫn cài đặt và chạy
+
+- Cài đặt: `pip install pygame` (nếu `gui.py` dùng Pygame).
+- Chạy: `python gui.py`
