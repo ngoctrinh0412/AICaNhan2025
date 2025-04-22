@@ -41,6 +41,7 @@ So sánh:
 A* và IDA* tối ưu, nhưng A* tốn bộ nhớ hơn (O(b^d)), còn IDA* tiết kiệm bộ nhớ.
 Greedy nhanh nhưng không tối ưu, có thể bỏ sót lời giải.
 Beam Search nhanh, tiết kiệm bộ nhớ, nhưng không hoàn chỉnh (có thể bỏ sót lời giải).
+
 Kết quả thực tế:
 
 ### Local Search (Tìm kiếm cục bộ)
@@ -112,6 +113,7 @@ Kết quả thực tế:
 Dưới đây là ảnh chụp giao diện GUI và kết quả của các thuật toán:
 
 Giao diện GUI:
+
 Biểu đồ so sánh số bước:
 
 ## Hướng dẫn cài đặt và chạy
