@@ -2,6 +2,7 @@ import heapq
 import random
 import math
 import numpy as np
+from itertools import permutations
 from utils import get_neighbors, manhattan_distance, find_zero, apply_action, update_belief_states, generate_partial_state, generate_full_belief_states, generate_initial_belief_states
 from copy import deepcopy
 
@@ -435,3 +436,188 @@ def belief_state_search(start_state, goal_state, max_steps=1000, use_partial=Tru
     
     print(f"Không tìm thấy lời giải sau {step_count} bước.")
     return None
+
+# Thuật toán CSP để kiểm tra trạng thái đích
+def csp(start, goal):
+    # Định nghĩa các biến và miền giá trị
+    positions = [(i, j) for i in range(3) for j in range(3)]  # 9 biến: P00, P01, ..., P22
+    values = list(range(9))  # Miền giá trị: 0-8
+    
+    # Ràng buộc All-Different: thử tất cả hoán vị của 0-8
+    for perm in permutations(values):
+        # Gán giá trị cho các ô
+        state = [[0 for _ in range(3)] for _ in range(3)]
+        idx = 0
+        for i, j in positions:
+            state[i][j] = perm[idx]
+            idx += 1
+        
+        # Ràng buộc: kiểm tra xem trạng thái có khớp với goal không
+        if np.array_equal(state, goal):
+            return [state]  # Trả về trạng thái đích (không có đường đi)
+    
+    return None  # Không tìm thấy trạng thái thỏa mãn
+
+# Thuật toán Backtracking Search (dựa trên DFS)
+def backtracking_search(start, goal, max_depth=100):
+    def backtrack(state, path, visited, depth):
+        # Kiểm tra trạng thái hiện tại có phải là đích không
+        if np.array_equal(state, goal):
+            return path + [state]
+        
+        # Kiểm tra độ sâu tối đa để tránh vòng lặp vô hạn
+        if depth >= max_depth:
+            return None
+        
+        # Thêm trạng thái hiện tại vào tập đã thăm
+        state_tuple = tuple(map(tuple, state))
+        if state_tuple in visited:
+            return None
+        visited.add(state_tuple)
+        
+        # Lấy các trạng thái lân cận (các di chuyển khả thi)
+        neighbors = get_neighbors(state)
+        for neighbor in neighbors:
+            # Thử di chuyển này và quay lui nếu cần
+            result = backtrack(neighbor, path + [state], visited, depth + 1)
+            if result is not None:
+                return result
+        
+        # Nếu không tìm thấy đường đi, quay lui
+        return None
+
+    visited = set()
+    return backtrack(start, [], visited, 0)
+
+def ac3(state, goal_state, constraints):
+    """
+    AC-3 algorithm for constraint propagation.
+    - state: Current state of the puzzle (3x3 grid).
+    - goal_state: Goal state (not used directly in AC-3 but included for consistency).
+    - constraints: Function to check constraints between variables (e.g., uniqueness of values).
+    Returns: True if arc-consistent, False if no solution.
+    """
+    # Convert state to a CSP representation
+    variables = [(i, j) for i in range(3) for j in range(3)]  # Variables are positions (i, j)
+    domains = {}
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] == 0:
+                domains[(i, j)] = list(range(9))  # Empty cell can take any value
+            else:
+                domains[(i, j)] = [state[i][j]]  # Fixed value
+
+    # Neighbors: Each position is constrained with all other positions (uniqueness constraint)
+    neighbors = {var: [other_var for other_var in variables if other_var != var] for var in variables}
+
+    # Initialize queue with all arcs
+    queue = [(xi, xj) for xi in variables for xj in neighbors[xi]]
+
+    while queue:
+        (xi, xj) = queue.pop(0)
+        if revise(domains, xi, xj, constraints):
+            if len(domains[xi]) == 0:
+                return False, domains
+            for xk in neighbors[xi]:
+                if xk != xj:
+                    queue.append((xk, xi))
+    return True, domains
+
+def revise(domains, xi, xj, constraints):
+    """
+    Revise the domain of xi to satisfy the constraint between xi and xj.
+    Returns True if the domain of xi is revised.
+    """
+    revised = False
+    values_to_remove = []
+    for x in domains[xi]:
+        # Check if there exists a value y in xj's domain that satisfies the constraint
+        if not any(constraints(xi, x, xj, y) for y in domains[xj]):
+            values_to_remove.append(x)
+            revised = True
+    for x in values_to_remove:
+        domains[xi].remove(x)
+    return revised
+
+def constraints(xi, x, xj, y):
+    """
+    Constraint: Two positions cannot have the same value unless they are both 0 (empty).
+    Additionally, ensure the empty tile can only move to adjacent positions.
+    """
+    if x == 0 or y == 0:
+        # If one is the empty tile, check adjacency constraint
+        (i1, j1), (i2, j2) = xi, xj
+        if x == 0 and y != 0:
+            # xi is empty, check if xj is adjacent
+            return (abs(i1 - i2) + abs(j1 - j2)) == 1
+        if y == 0 and x != 0:
+            # xj is empty, check if xi is adjacent
+            return (abs(i1 - i2) + abs(j1 - j2)) == 1
+        return True
+    return x != y  # Uniqueness constraint
+
+def is_goal(state, goal_state):
+    """
+    Kiểm tra xem trạng thái hiện tại có phải là trạng thái mục tiêu không.
+    - state: Trạng thái hiện tại.
+    - goal_state: Trạng thái mục tiêu.
+    Trả về: True nếu trạng thái hiện tại là mục tiêu, False nếu không.
+    """
+    return state == goal_state
+
+def maintaining_arc_consistency(state, goal_state):
+    """
+    Thuật toán Maintaining Arc-Consistency (MAC) cải tiến cho bài toán 8-Puzzle.
+    Sử dụng tìm kiếm không gian trạng thái với heuristic (Manhattan distance) để dẫn dắt tìm kiếm.
+    - state: Trạng thái ban đầu (lưới 3x3).
+    - goal_state: Trạng thái mục tiêu (lưới 3x3).
+    Trả về: Danh sách các bước từ trạng thái ban đầu đến trạng thái mục tiêu.
+    """
+    def backtrack(current_state, visited, depth_limit):
+        """
+        Tìm kiếm backtracking với giới hạn độ sâu để tìm đường đi từ trạng thái hiện tại đến trạng thái mục tiêu.
+        - current_state: Trạng thái hiện tại.
+        - visited: Tập hợp các trạng thái đã duyệt qua (dạng chuỗi).
+        - depth_limit: Giới hạn độ sâu tìm kiếm.
+        Trả về: Danh sách các trạng thái từ trạng thái hiện tại đến mục tiêu, hoặc None nếu không tìm thấy.
+        """
+        if is_goal(current_state, goal_state):
+            return [current_state]
+
+        state_str = str(current_state)
+        if state_str in visited:
+            return None
+        visited.add(state_str)
+
+        # Lấy các trạng thái kế tiếp
+        neighbors = get_neighbors(current_state)
+        # Sắp xếp các trạng thái kế tiếp theo khoảng cách Manhattan để ưu tiên trạng thái gần mục tiêu
+        neighbors.sort(key=lambda s: manhattan_distance(s, goal_state))
+
+        for next_state in neighbors:
+            sub_path = backtrack(next_state, visited, depth_limit)
+            if sub_path is not None:
+                return [current_state] + sub_path
+
+        return None
+
+    # Bắt đầu tìm kiếm với độ sâu tăng dần (giống Iterative Deepening Search)
+    visited = set()
+    depth_limit = 0
+    max_depth = 100  # Giới hạn độ sâu tối đa để tránh vòng lặp vô hạn
+
+    while depth_limit <= max_depth:
+        result = backtrack(state, visited.copy(), depth_limit)
+        if result is not None:
+            # Loại bỏ các trạng thái trùng lặp nhưng vẫn giữ nguyên thứ tự
+            seen = set()
+            unique_path = []
+            for s in result:
+                state_str = str(s)
+                if state_str not in seen:
+                    seen.add(state_str)
+                    unique_path.append(s)
+            return unique_path
+        depth_limit += 1
+
+    return []  # Không tìm thấy lời giải
