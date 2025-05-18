@@ -2,9 +2,9 @@ import heapq
 import random
 import math
 import numpy as np
-from itertools import permutations
 from utils import get_neighbors, manhattan_distance, find_zero, apply_action, update_belief_states, generate_partial_state, generate_full_belief_states, generate_initial_belief_states
 from copy import deepcopy
+from collections import defaultdict
 
 # Thuật toán BFS
 def bfs(start, goal):
@@ -384,19 +384,61 @@ def and_or_search(start, goal, max_depth=100):
     return solve(start, [], visited, 0)
 
 # Thuật toán Belief State Search
-def belief_state_search(start_state, goal_state, max_steps=1000, use_partial=True):
+def belief_state_search(start_state, goal_state, max_steps=1000):
+    real_state = deepcopy(start_state)
+    partial_state = generate_partial_state(start_state, num_unknown=2)
+    real_path = [real_state]
+    
+    belief_states = generate_full_belief_states(start_state, goal_state)
+
+    if not belief_states:
+        print("Không tạo được belief states khả thi.")
+        return None
+    
+    print(f"Số belief states ban đầu: {len(belief_states)}")
+    
+    queue = [(manhattan_distance(real_state, goal_state), 0, real_state, belief_states, real_path, [])]
+    visited = set()
+    actions = ["up", "down", "left", "right"]
+    step_count = 0
+    
+    while queue and step_count < max_steps:
+        f_score, g_score, real_state, belief_states, path, action_sequence = heapq.heappop(queue)
+        step_count += 1
+        
+        state_tuple = tuple(map(tuple, real_state))
+        if state_tuple in visited:
+            continue
+        visited.add(state_tuple)
+        
+        if all(state == goal_state for state in belief_states):
+            print(f"Đạt goal_state sau {len(path)-1} bước.")
+            return path
+        
+        for action in actions:
+            new_real_state = apply_action(real_state, action)
+            if new_real_state:
+                new_belief_states = update_belief_states(belief_states, action, real_state=None, partial_state=partial_state)
+                if not new_belief_states:
+                    continue
+                new_g_score = g_score + 1
+                new_f_score = new_g_score + manhattan_distance(new_real_state, goal_state)
+                new_path = path + [new_real_state]
+                new_actions = action_sequence + [action]
+                heapq.heappush(queue, (new_f_score, new_g_score, new_real_state, new_belief_states, new_path, new_actions))
+    
+    print(f"Không tìm thấy lời giải sau {step_count} bước.")
+    return None
+
+# Thuật toán Searching with Partial Observation
+def searching_with_partial_observation(start_state, goal_state, max_steps=1000):
     real_state = deepcopy(start_state)
     real_path = [real_state]
     
-    if use_partial:
-        partial_state = generate_partial_state(start_state, num_unknown=1)
-        print(f"Partial State (Có None): {partial_state}")
-        known_positions = [partial_state[i][j] for i in range(3) for j in range(3) if partial_state[i][j] is not None]
-        belief_states = generate_initial_belief_states(partial_state, known_positions, goal_state)
-    else:
-        partial_state = start_state
-        print(f"Partial State (Không None): {partial_state}")
-        belief_states = generate_full_belief_states(start_state, goal_state)
+    partial_state = generate_partial_state(start_state, num_unknown=2)
+    print(f"Partial State (Có None): {partial_state}")
+    known_positions = [partial_state[i][j] for i in range(3) for j in range(3) if partial_state[i][j] is not None]
+    belief_states = generate_initial_belief_states(partial_state, known_positions, goal_state)
     
     if not belief_states:
         print("Không tạo được belief states khả thi.")
@@ -418,6 +460,7 @@ def belief_state_search(start_state, goal_state, max_steps=1000, use_partial=Tru
             continue
         visited.add(state_tuple)
         
+        # Kiểm tra nếu real_state đã đạt goal_state
         if real_state == goal_state:
             print(f"Đạt goal_state sau {len(path)-1} bước.")
             return path
@@ -425,9 +468,10 @@ def belief_state_search(start_state, goal_state, max_steps=1000, use_partial=Tru
         for action in actions:
             new_real_state = apply_action(real_state, action)
             if new_real_state:
-                new_belief_states = update_belief_states(belief_states, action)
+                new_belief_states = update_belief_states(belief_states, action, new_real_state, partial_state=partial_state)
                 if not new_belief_states:
-                    continue
+                    print("Không còn belief states khả thi sau hành động:", action)
+                    return None  # Không còn trạng thái khả thi, dừng thuật toán
                 new_g_score = g_score + 1
                 new_f_score = new_g_score + manhattan_distance(new_real_state, goal_state)
                 new_path = path + [new_real_state]
@@ -436,27 +480,6 @@ def belief_state_search(start_state, goal_state, max_steps=1000, use_partial=Tru
     
     print(f"Không tìm thấy lời giải sau {step_count} bước.")
     return None
-
-# Thuật toán CSP để kiểm tra trạng thái đích
-def csp(start, goal):
-    # Định nghĩa các biến và miền giá trị
-    positions = [(i, j) for i in range(3) for j in range(3)]  # 9 biến: P00, P01, ..., P22
-    values = list(range(9))  # Miền giá trị: 0-8
-    
-    # Ràng buộc All-Different: thử tất cả hoán vị của 0-8
-    for perm in permutations(values):
-        # Gán giá trị cho các ô
-        state = [[0 for _ in range(3)] for _ in range(3)]
-        idx = 0
-        for i, j in positions:
-            state[i][j] = perm[idx]
-            idx += 1
-        
-        # Ràng buộc: kiểm tra xem trạng thái có khớp với goal không
-        if np.array_equal(state, goal):
-            return [state]  # Trả về trạng thái đích (không có đường đi)
-    
-    return None  # Không tìm thấy trạng thái thỏa mãn
 
 # Thuật toán Backtracking Search (dựa trên DFS)
 def backtracking_search(start, goal, max_depth=100):
@@ -488,6 +511,76 @@ def backtracking_search(start, goal, max_depth=100):
 
     visited = set()
     return backtrack(start, [], visited, 0)
+
+# Thuật toán Backtracking with Forward Checking
+def backtracking_with_forward_checking(start, goal, max_depth=100):
+    def forward_check(state, domains):
+        new_domains = domains  # Tránh deepcopy nếu không cần thiết
+        zero_pos = find_zero(state)
+        zero_row, zero_col = zero_pos
+
+    # Chỉ kiểm tra các ô lân cận của ô trống
+        neighbors_pos = []
+        if zero_row > 0:
+            neighbors_pos.append((zero_row - 1, zero_col))
+        if zero_row < 2:
+            neighbors_pos.append((zero_row + 1, zero_col))
+        if zero_col > 0:
+            neighbors_pos.append((zero_row, zero_col - 1))
+        if zero_col < 2:
+            neighbors_pos.append((zero_row, zero_col + 1))
+
+    # Cập nhật miền giá trị của các ô lân cận
+        for pos in neighbors_pos:
+            i, j = pos
+            val = state[i][j]
+        # Loại bỏ giá trị này khỏi miền của các ô khác
+            for other_pos in variables:
+                if other_pos != pos and other_pos != (zero_row, zero_col) and val in new_domains[other_pos]:
+                    new_domains[other_pos].remove(val)
+                    if not new_domains[other_pos]:
+                        return False, new_domains
+        return True, new_domains
+
+    def backtrack(state, path, visited, domains, depth):
+        if np.array_equal(state, goal):
+            return path + [state]
+        if depth >= max_depth:
+            return None
+        state_tuple = tuple(map(tuple, state))
+        if state_tuple in visited:
+            return None
+        visited.add(state_tuple)
+
+    # Cập nhật miền giá trị dựa trên trạng thái hiện tại
+        new_domains = {pos: domains[pos] for pos in domains}  # Sao chép nông
+        for i in range(3):
+            for j in range(3):
+                val = state[i][j]
+                pos = (i, j)
+                new_domains[pos] = [val]
+
+        consistent, new_domains = forward_check(state, new_domains)
+        if not consistent:
+            return None
+
+        neighbors = get_neighbors(state)
+    # Sắp xếp neighbors theo Manhattan Distance
+        neighbors.sort(key=lambda x: manhattan_distance(x, goal))
+        for neighbor in neighbors:
+            consistent, temp_domains = forward_check(neighbor, new_domains)
+            if consistent:
+                result = backtrack(neighbor, path + [state], visited, temp_domains, depth + 1)
+                if result is not None:
+                    return result
+        return None
+
+    # Khởi tạo miền giá trị
+    variables = [(i, j) for i in range(3) for j in range(3)]
+    domains = {pos: list(range(9)) for pos in variables}
+    neighbors = {pos: [other_pos for other_pos in variables if other_pos != pos] for pos in variables}
+    visited = set()
+    return backtrack(start, [], visited, domains, 0)
 
 def ac3(state, goal_state, constraints):
     """
@@ -621,3 +714,117 @@ def maintaining_arc_consistency(state, goal_state):
         depth_limit += 1
 
     return []  # Không tìm thấy lời giải
+
+def q_learning(state, goal_state, episodes=1000, alpha=0.1, gamma=0.9, epsilon=0.1):
+    """
+    Thuật toán Q-Learning cho bài toán 8-Puzzle.
+    - state: Trạng thái ban đầu (lưới 3x3).
+    - goal_state: Trạng thái mục tiêu (lưới 3x3).
+    - episodes: Số lần huấn luyện (mặc định: 1000).
+    - alpha: Tốc độ học (learning rate, mặc định: 0.1).
+    - gamma: Hệ số giảm giá (discount factor, mặc định: 0.9).
+    - epsilon: Tỷ lệ khám phá (exploration rate, mặc định: 0.1).
+    Trả về: Danh sách các bước từ trạng thái ban đầu đến trạng thái mục tiêu.
+    """
+    # Chuyển trạng thái thành dạng chuỗi để lưu trong Q-Table
+    def state_to_str(state):
+        return str([[state[i][j] for j in range(3)] for i in range(3)])
+
+    # Khởi tạo Q-Table (lưu chỉ mục của action trong possible_actions)
+    q_table = defaultdict(lambda: defaultdict(float))
+
+    # Hàm chọn hành động dựa trên epsilon-greedy
+    def choose_action(state_str, possible_actions):
+        if random.uniform(0, 1) < epsilon:  # Khám phá (exploration)
+            return random.choice(possible_actions)
+        else:  # Khai thác (exploitation)
+            q_values = q_table[state_str]
+            if not q_values:  # Nếu chưa có giá trị Q nào, chọn ngẫu nhiên
+                return random.choice(possible_actions)
+            max_q = max(q_values.values(), default=0)
+            # Lấy chỉ mục action có Q-value cao nhất
+            best_indices = [idx for idx, q in q_values.items() if q == max_q]
+            chosen_idx = random.choice(best_indices)
+            return possible_actions[chosen_idx]
+
+    # Huấn luyện Q-Learning
+    for episode in range(episodes):
+        current_state = [row[:] for row in state]  # Sao chép trạng thái ban đầu
+        current_state_str = state_to_str(current_state)
+        steps = 0
+        max_steps = 1000  # Giới hạn số bước tối đa trong mỗi episode
+
+        while steps < max_steps:
+            # Lấy các hành động có thể (các trạng thái kế tiếp)
+            possible_actions = get_neighbors(current_state)
+            if not possible_actions:  # Nếu không có hành động nào, thoát
+                break
+
+            # Chọn hành động
+            action = choose_action(current_state_str, possible_actions)
+            action_idx = possible_actions.index(action)  # Lấy chỉ mục của action
+
+            # Tính phần thưởng
+            reward = -1  # Phạt cho mỗi bước di chuyển
+            if is_goal(action, goal_state):
+                reward = 100  # Thưởng lớn nếu đạt mục tiêu
+                next_state = action
+            else:
+                next_state = action
+
+            # Cập nhật Q-Table với chỉ mục
+            next_state_str = state_to_str(next_state)
+            old_q = q_table[current_state_str][action_idx]
+            future_q = max(q_table[next_state_str].values()) if q_table[next_state_str] else 0
+            new_q = old_q + alpha * (reward + gamma * future_q - old_q)
+            q_table[current_state_str][action_idx] = new_q
+
+            # Chuyển sang trạng thái mới
+            current_state = [row[:] for row in next_state]  # Đảm bảo copy danh sách
+            current_state_str = next_state_str
+            steps += 1
+
+            # Thoát nếu đạt mục tiêu
+            if is_goal(current_state, goal_state):
+                break
+
+    # Sử dụng Q-Table đã huấn luyện để tìm đường đi
+    path = [state]
+    current_state = [row[:] for row in state]
+    current_state_str = state_to_str(current_state)
+    visited = set()
+    visited.add(current_state_str)
+    max_steps = 100  # Giới hạn số bước tối đa khi tìm đường
+
+    for _ in range(max_steps):
+        possible_actions = get_neighbors(current_state)
+        if not possible_actions:
+            break
+
+        # Chọn hành động tốt nhất (khai thác)
+        q_values = q_table[current_state_str]
+        if not q_values:  # Nếu không có giá trị Q, thoát
+            break
+
+        max_q = max(q_values.values(), default=0)
+        best_indices = [idx for idx, q in q_values.items() if q == max_q]
+        if not best_indices:
+            break
+
+        chosen_idx = random.choice(best_indices)
+        next_state = possible_actions[chosen_idx]
+
+        next_state_str = state_to_str(next_state)
+
+        path.append(next_state)
+        current_state = [row[:] for row in next_state]
+        current_state_str = next_state_str
+
+        if is_goal(current_state, goal_state):
+            break
+
+        if next_state_str in visited:
+            break
+        visited.add(next_state_str)
+
+    return path if path else None

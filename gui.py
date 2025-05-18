@@ -4,7 +4,7 @@ from tkinter import messagebox, simpledialog, ttk
 import time
 from constants import WIDTH, HEIGHT, COLORS
 from utils import draw_board, update_canvas, display_state
-from algorithms import bfs, dfs, ids, ucs, greedy, astar, ida_star, simple_hill_climbing, steepest_ascent_hill_climbing, stochastic_hill_climbing, simulated_annealing, beam_search, genetic_algorithm, and_or_search, belief_state_search, csp, backtracking_search, maintaining_arc_consistency
+from algorithms import bfs, dfs, ids, ucs, greedy, astar, ida_star, simple_hill_climbing, steepest_ascent_hill_climbing, stochastic_hill_climbing, simulated_annealing, beam_search, genetic_algorithm, and_or_search, belief_state_search, searching_with_partial_observation, backtracking_search, backtracking_with_forward_checking,maintaining_arc_consistency, q_learning
 
 # Tkinter GUI
 def start_gui():
@@ -42,8 +42,10 @@ def start_gui():
     algorithm_var = tk.StringVar(value="BFS")
     algorithms = ["BFS", "DFS", "IDS", "UCS", "Greedy", "A*", "IDA*", "Simple Hill Climbing",
                   "Steepest-Ascent Hill Climbing", "Stochastic Hill Climbing", "Simulated Annealing",
-                  "Beam Search", "Genetic Algorithm", "AND-OR Search", "Belief State Search",
-                  "CSP", "Backtracking Search", "Maintaining Arc-Consistency"]
+                  "Beam Search", "Genetic Algorithm", "AND-OR Search", "Belief State Search" ,
+                  "Searching with Partial Observation",
+                  "Backtracking Search", "Backtracking with Forward Checking",
+                  "Maintaining Arc-Consistency", "Q-Learning"]
     
     # Tùy chỉnh OptionMenu
     style = ttk.Style()
@@ -52,14 +54,6 @@ def start_gui():
     style.map("Custom.TMenubutton", background=[("active", COLORS["ACCENT"]["hex"])])
     algorithm_menu = ttk.OptionMenu(frame_left, algorithm_var, "BFS", *algorithms, style="Custom.TMenubutton")
     algorithm_menu.pack(pady=5, padx=20, fill=tk.X)
-
-    # Menu thả xuống cho Belief State
-    tk.Label(frame_left, text="Tùy chọn Belief State", font=("Helvetica", 14, "bold"),
-             bg=COLORS["WHITE"]["hex"], fg=COLORS["BLACK"]["hex"]).pack(pady=(20, 10))
-    belief_mode_var = tk.StringVar(value="Có None")
-    belief_modes = ["Có None", "Không None"]
-    belief_mode_menu = ttk.OptionMenu(frame_left, belief_mode_var, "Có None", *belief_modes, style="Custom.TMenubutton")
-    belief_mode_menu.pack(pady=5, padx=20, fill=tk.X)
 
     # Frame giữa (trạng thái đầu và đích)
     frame_middle = tk.Frame(main_frame, bg=COLORS["WHITE"]["hex"], relief="flat",
@@ -138,8 +132,7 @@ def start_gui():
 
     # Hàm hiển thị trạng thái dưới dạng lưới 3x3 với giao diện đẹp
     def display_state_custom(parent, state, step_num):
-        step_frame = tk.Frame(parent, bg=COLORS["WHITE"]["hex"], bd=2, relief="groove",
-                              highlightbackground=COLORS["SHADOW"]["hex"], highlightthickness=2)
+        step_frame = tk.Frame(parent, bg=COLORS["WHITE"]["hex"], bd=2, relief="groove")
 
         # Nhãn "Bước X"
         tk.Label(step_frame, text=f"Bước {step_num}", font=("Helvetica", 10, "bold"),
@@ -292,10 +285,12 @@ def start_gui():
             "Beam Search": beam_search,
             "Genetic Algorithm": genetic_algorithm,
             "AND-OR Search": and_or_search,
-            "Belief State Search": lambda start, goal: belief_state_search(start, goal, use_partial=(belief_mode_var.get() == "Có None")),
-            "CSP": csp,
+            "Belief State Search": belief_state_search,
+            "Searching with Partial Observation": searching_with_partial_observation,
             "Backtracking Search": backtracking_search,
-    "Maintaining Arc-Consistency": maintaining_arc_consistency
+            "Backtracking with Forward Checking": backtracking_with_forward_checking,
+    "Maintaining Arc-Consistency": maintaining_arc_consistency,
+    "Q-Learning": q_learning  
         }
         algo = algorithm_var.get()
         start_time = time.time()
