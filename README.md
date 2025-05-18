@@ -1,121 +1,121 @@
-# Đồ án AI cá nhân: 8-Puzzle
+# Báo cáo AI cá nhân: 8-Puzzle Solver
 
-## Giới thiệu
+## Mục tiêu
 
-Đồ án này triển khai các thuật toán trí tuệ nhân tạo (AI) để giải quyết bài toán 8-Puzzle Problem. 8-Puzzle là một trò chơi xếp số trên bảng 3x3, gồm 8 ô số (từ 1 đến 8) và 1 ô trống (zero). Mục tiêu là di chuyển ô trống (lên, xuống, trái, phải) để đưa trạng thái ban đầu về trạng thái đích (goal state).
+Mục tiêu của dự án 8-Puzzle Solver là phát triển một ứng dụng giải bài toán 8-puzzle bằng cách triển khai và so sánh hiệu suất của nhiều thuật toán tìm kiếm và tối ưu hóa khác nhau. Dự án tập trung vào:
 
-Dự án sử dụng nhiều thuật toán AI, chia thành các nhóm: Uninformed Search, Informed Search, Local Search, Genetic Algorithm, AND-OR Search, và Belief State Search. Các thuật toán được triển khai để tìm đường đi từ trạng thái ban đầu đến trạng thái đích, đồng thời so sánh hiệu quả giữa chúng.
+- Xây dựng giao diện đồ họa (GUI) để hiển thị trạng thái ban đầu, trạng thái mục tiêu, và tiến trình giải.
 
-Code được viết bằng Python, sử dụng các thư viện như pygame (cho giao diện GUI), numpy, và các hàm tiện ích trong utils.py để xử lý trạng thái, tính khoảng cách Manhattan, và tạo trạng thái niềm tin.
+- Triển khai 6 nhóm thuật toán: Tìm kiếm không có thông tin (BFS, DFS, UCS, IDS), Tìm kiếm có thông tin (Greedy, A*, IDA*), Tìm kiếm cục bộ (Beam Search, Stochastic Hill -Climbing, Steepest-Ascent Hill Climbing, Simple Hill Climbing, Genetic Algorithm), Môi trường phức tạp (AND-OR Search, Belief State Search, Searching with Partial Observation), CSPs (Backtracking, Backtracking with Forward Checking), và Học tăng cường (Q-Learning).
 
-## Các nhóm thuật toán
+- Đánh giá hiệu suất của các thuật toán dựa trên số bước và thời gian thực hiện.
 
-### Uninformed Search (Tìm kiếm không có thông tin)
+- Cung cấp khả năng tùy chỉnh trạng thái ban đầu và kiểm tra tính khả thi của bài toán.
+## Nội dung
 
-Các thuật toán này không sử dụng thông tin heuristic, chỉ dựa vào cấu trúc của không gian trạng thái:
+### Các thuật toán Tìm kiếm không có thông tin (BFS, DFS, UCS, IDS)
 
-BFS (Breadth-First Search): Tìm kiếm theo chiều rộng.
-DFS (Depth-First Search): Tìm kiếm theo chiều sâu.
-IDS (Iterative Deepening Search): Tìm kiếm lặp sâu dần.
-UCS (Uniform Cost Search): Tìm kiếm chi phí đồng nhất.
+**Các thành phần chính của bài toán tìm kiếm và solution**
+- Thành phần chính: Bài toán 8-puzzle được mô hình hóa như một bài toán tìm kiếm không gian trạng thái, bao gồm:
+  - Trạng thái ban đầu: Lưới 3x3 với 8 ô số và 1 ô trống (0).
+  - Trạng thái mục tiêu: Lưới 3x3 với các ô số từ 1-8 và ô trống ở vị trí cuối.
+  - Hành động: Di chuyển ô trống lên, xuống, trái, hoặc phải.
+  - Hàm chuyển trạng thái: Tạo các trạng thái lân cận bằng cách hoán đổi ô trống với ô liền kề.
+  - Hàm đánh giá: Kiểm tra xem trạng thái hiện tại có phải là trạng thái mục tiêu không.
+- Solution: Là danh sách các trạng thái từ trạng thái ban đầu đến trạng thái mục tiêu, thể hiện đường đi tối ưu (đối với UCS) hoặc đường đi khả thi (đối với BFS, DFS, IDS).
 
-So sánh:
+**Hình ảnh GIF của từng thuật toán khi áp dụng lên trò chơi:**
 
-BFS và IDS tìm được đường ngắn nhất, nhưng BFS tốn nhiều bộ nhớ hơn (O(b^d)).
-DFS nhanh nhưng không hoàn chỉnh, có thể không tìm được lời giải nếu không giới hạn độ sâu.
-UCS tối ưu nhưng tốn bộ nhớ tương tự BFS.
+**Hình ảnh so sánh hiệu suất của các thuật toán:**
 
-Kết quả thực tế :
+**Nhận xét về hiệu suất:**
+- BFS: Đảm bảo tìm ra đường đi ngắn nhất nhưng tiêu tốn nhiều bộ nhớ do phải lưu trữ tất cả các nút ở cùng cấp độ. Hiệu suất giảm mạnh với các trạng thái phức tạp hoặc sâu.
+- DFS: Nhanh hơn về bộ nhớ vì chỉ lưu trữ một nhánh, nhưng dễ bị lặp vô hạn hoặc tìm ra đường đi không tối ưu nếu không giới hạn độ sâu.
+- UCS: Tìm đường đi tối ưu dựa trên chi phí (mỗi bước có chi phí 1), nhưng chậm hơn BFS do cần tính toán và sắp xếp chi phí, đặc biệt với không gian trạng thái lớn.
+- IDS: Kết hợp ưu điểm của DFS và BFS, tiết kiệm bộ nhớ hơn BFS nhưng có thể chậm hơn do lặp lại việc tìm kiếm ở các độ sâu khác nhau.
+### Các thuật toán Tìm kiếm có thông tin (Greedy, A*, IDA*)
 
-### Informed Search (Tìm kiếm có thông tin)
+**Các thành phần chính của bài toán tìm kiếm và solution**
 
-Các thuật toán này sử dụng heuristic (khoảng cách Manhattan) để định hướng tìm kiếm:
+- Thành phần chính: Ngoài các thành phần cơ bản, thêm hàm heuristic (Manhattan Distance) để định hướng tìm kiếm.
+- Solution: Là đường đi ngắn nhất (A*) hoặc đường đi khả thi (Greedy, IDA*) dựa trên heuristic.
 
-Greedy Search: Tìm kiếm tham lam.
-A Search*: Tìm kiếm A*.
-IDA (Iterative Deepening A)\*_: Tìm kiếm A_ lặp sâu dần.
-Beam Search: Tìm kiếm chùm (beam width = 3).
+**Hình ảnh GIF của từng thuật toán:**
 
-So sánh:
+**Hình ảnh so sánh hiệu suất:**
 
-A* và IDA* tối ưu, nhưng A* tốn bộ nhớ hơn (O(b^d)), còn IDA* tiết kiệm bộ nhớ.
-Greedy nhanh nhưng không tối ưu, có thể bỏ sót lời giải.
-Beam Search nhanh, tiết kiệm bộ nhớ, nhưng không hoàn chỉnh (có thể bỏ sót lời giải).
+**Nhận xét về hiệu suất:**
+- Greedy: Nhanh chóng nhờ chỉ dựa vào heuristic (Manhattan Distance), nhưng không đảm bảo tìm ra đường đi tối ưu và có thể bị kẹt ở ngõ cụt.
+- A*: Cân bằng giữa chi phí đã đi và heuristic, đảm bảo tìm đường đi tối ưu với hiệu suất tốt nếu heuristic là hợp lệ và nhất quán (như Manhattan Distance). Tuy nhiên, tốn bộ nhớ do sử dụng hàng đợi ưu tiên.
+- IDA*: Tiết kiệm bộ nhớ hơn A* bằng cách giới hạn ngưỡng heuristic, nhưng có thể chậm hơn với các trạng thái có heuristic phức tạp hoặc không gian trạng thái lớn.
+### Các thuật toán Tìm kiếm cục bộ (Beam Search, Stochastic Hill Climbing, Steepest-Ascent Hill Climbing, Simple Hill Climbing, Genetic Algorithm, Simulated Annealing)
 
-Kết quả thực tế:
+**Các thành phần chính của bài toán tìm kiếm và solution**
 
-### Local Search (Tìm kiếm cục bộ)
+- Thành phần chính: Sử dụng heuristic để cải tiến trạng thái cục bộ, với Beam Search giới hạn số nút, Genetic Algorithm sử dụng quần thể và đột biến.
+- Solution: Đường đi khả thi, không nhất thiết tối ưu.
 
-Các thuật toán này tập trung vào cải thiện từng bước, không đảm bảo tìm lời giải tối ưu:
+**Hình ảnh GIF và so sánh hiệu suất:** 
 
-Simple Hill Climbing: Leo đồi đơn giản.
-Steepest-Ascent Hill Climbing: Leo đồi dốc nhất.
-Stochastic Hill Climbing: Leo đồi ngẫu nhiên.
-Simulated Annealing: Ủ kim loại mô phỏng.
+**Nhận xét về hiệu suất:**
 
-So sánh:
+- Beam Search: Hiệu quả với beam_width nhỏ, giảm bộ nhớ so với tìm kiếm toàn cục, nhưng có thể bỏ lỡ lời giải nếu beam_width quá hẹp hoặc không gian trạng thái quá lớn.
+- Simple Hill Climbing: Nhanh và đơn giản, nhưng dễ bị kẹt ở cực trị cục bộ, dẫn đến thất bại nếu không có đường đi trực tiếp giảm heuristic.
+- Steepest-Ascent Hill Climbing: Cải tiến hơn Simple Hill Climbing bằng cách chọn trạng thái tốt nhất trong số các lân cận, nhưng vẫn dễ bị kẹt ở cực trị cục bộ và yêu cầu nhiều phép tính hơn.
+- Stochastic Hill Climbing: Linh hoạt hơn nhờ chọn ngẫu nhiên trong số các trạng thái tốt hơn, giảm nguy cơ kẹt ở cực trị cục bộ, nhưng hiệu suất phụ thuộc vào may rủi.
+- Genetic Algorithm: Rất linh hoạt và có thể tìm ra lời giải trong không gian phức tạp, nhưng cần nhiều thời gian huấn luyện và tài nguyên do sử dụng quần thể và tiến hóa qua nhiều thế hệ.
+- Simulated Annealing: Khắc phục nhược điểm của Hill Climbing bằng cách cho phép chấp nhận trạng thái xấu hơn với xác suất, tránh được cực trị cục bộ. Hiệu suất tốt hơn Hill Climbing trong các trạng thái phức tạp, nhưng phụ thuộc vào tham số nhiệt độ (T, cooling_rate) và có thể chậm nếu cần nhiều bước để hội tụ.
+### Các thuật toán trong môi trường phức tạp (AND-OR Search, Belief State Search, Searching with Partial Observation)
 
-Simple và Steepest-Ascent dễ bị kẹt ở cực trị cục bộ.
-Stochastic thêm yếu tố ngẫu nhiên, có thể thoát cực trị cục bộ nhưng không đảm bảo lời giải.
-Simulated Annealing hiệu quả hơn nhờ cơ chế nhiệt độ, có khả năng thoát cực trị cục bộ.
+**Các thành phần chính của bài toán tìm kiếm và solution**
 
-Kết quả thực tế:
+- Thành phần chính: Xử lý trạng thái không chắc chắn (belief states) và quan sát một phần.
+- Solution: Đường đi dựa trên cập nhật belief states.
 
-### Genetic Algorithm (Thuật toán di truyền)
+**Hình ảnh GIF và so sánh hiệu suất:**
 
-Genetic Algorithm: Tạo quần thể các đường đi, tiến hành lai ghép và đột biến để tìm lời giải.
+**Nhận xét về hiệu suất:**
 
-So sánh:
+- AND-OR Search: Phù hợp với các bài toán có phụ thuộc logic phức tạp, nhưng hiệu suất thấp trong 8-puzzle do không tận dụng được cấu trúc tuyến tính, và dễ bị giới hạn bởi độ sâu tối đa.
+- Belief State Search: Hiệu quả trong môi trường không chắc chắn (partial observation), nhưng tốn nhiều bộ nhớ và thời gian để quản lý và cập nhật belief states, đặc biệt với số lượng ô không xác định lớn.
+- Searching with Partial Observation: Linh hoạt và thích nghi tốt với thông tin quan sát từng bước, nhưng hiệu suất phụ thuộc vào độ chính xác của quan sát và có thể thất bại nếu belief states không còn khả thi.
 
-Phù hợp với không gian tìm kiếm lớn, nhưng phụ thuộc vào tham số (population size, mutation rate).
-Không đảm bảo lời giải tối ưu, nhưng có thể tìm đường đi khả thi.
+### Các thuật toán CSPs (Backtracking, Backtracking with Forward Checking)
+**Các thành phần chính của bài toán tìm kiếm và solution**
 
-Kết quả thực tế:
+-Thành phần chính: Miền giá trị và ràng buộc duy nhất.
+-Solution: Đường đi thỏa mãn ràng buộc.
 
-### AND-OR Search
+**Hình ảnh GIF và so sánh hiệu suất:**
 
-AND-OR Search: Tìm kiếm dạng cây AND-OR, phù hợp với bài toán có nhiều lựa chọn.
+**Nhận xét về hiệu suất:**
 
-So sánh:
+- Backtracking Search: Cơ bản và dễ triển khai, nhưng hiệu suất thấp do phải thử nghiệm nhiều trạng thái không hợp lệ, đặc biệt với không gian trạng thái lớn.
+- Backtracking with Forward Checking: Cải thiện hiệu suất bằng cách loại bỏ sớm các giá trị không hợp lệ, giảm số lượng trạng thái cần kiểm tra, nhưng vẫn có thể chậm nếu ràng buộc phức tạp.
 
-Hữu ích khi có nhiều lựa chọn, nhưng phức tạp và tốn tài nguyên nếu không giới hạn độ sâu.
+### Các thuật toán Học tăng cường (Q-Learning)
+**Các thành phần chính của bài toán tìm kiếm và solution**
 
-Kết quả thực tế:
+- Thành phần chính: Q-Table, phần thưởng, và epsilon-greedy.
+- Solution: Đường đi học được từ huấn luyện.
 
-### Belief State Search
+**Hình ảnh GIF và so sánh hiệu suất**
 
-Belief State Search: Tìm kiếm dựa trên trạng thái niềm tin, xử lý bài toán với thông tin đầy đủ và không đầy đủ.
+**Nhận xét về hiệu suất:**
 
-Hai trường hợp:
+- Q-Learning: Hiệu quả khi được huấn luyện tốt với số lượng episode lớn, có khả năng học đường đi tối ưu theo thời gian. Tuy nhiên, cần nhiều thời gian huấn luyện ban đầu và hiệu suất ban đầu có thể kém do khám phá ngẫu nhiên (epsilon-greedy).
+## Kết luận
 
-Trường hợp đầy đủ thông tin (Full State):
+Dự án 8-Puzzle Solver đã thành công trong việc triển khai 6 nhóm thuật toán với giao diện đồ họa trực quan. Kết quả đạt được bao gồm:
 
-Mô tả: Trạng thái ban đầu được biết hoàn toàn (không có ô nào là None). Thuật toán tạo một tập belief states duy nhất (chỉ chứa trạng thái ban đầu) và tìm kiếm đường đi đến trạng thái đích bằng A\* Search.
-Ưu điểm: Đơn giản, nhanh, ít tốn bộ nhớ (chỉ có 1 belief state).
-Nhược điểm: Không tận dụng được đặc trưng của Belief State Search, vì không có thông tin không đầy đủ.
+Xây dựng GUI cho phép người dùng nhập trạng thái và quan sát tiến trình giải.
+Triển khai đa dạng thuật toán, từ cơ bản (BFS, DFS) đến nâng cao (Belief State Search, Q-Learning).
 
-Trường hợp không đầy đủ thông tin (Partial State):
+So sánh hiệu suất qua biểu đồ, cho thấy A* và UCS vượt trội về độ tối ưu, trong khi Genetic Algorithm và Q-Learning phù hợp với môi trường phức tạp.
 
-Mô tả: Trạng thái ban đầu có một số ô không biết (None). Thuật toán tạo tập belief states chứa tất cả trạng thái khả thi, dựa trên các ô đã biết và trạng thái đích, rồi tìm kiếm đường đi bằng A\* Search.
-Ưu điểm: Hữu ích khi xử lý thông tin không đầy đủ, mô phỏng tình huống thực tế (như robot di chuyển trong môi trường không biết trước).
-Nhược điểm: Phức tạp, tốn tài nguyên do phải duy trì và cập nhật nhiều trạng thái niềm tin (số lượng belief states có thể lớn).
+Phát hiện rằng thuật toán như Belief State Search hiệu quả trong các tình huống không chắc chắn, nhưng tốn tài nguyên.
 
-So sánh:
-
-Độ phức tạp: Full State đơn giản hơn (O(b^d)), trong khi Partial State phức tạp hơn (O(b^d \* |B|), với |B| là số belief states).
-Hiệu quả: Full State nhanh và ít tốn bộ nhớ, nhưng không thể hiện ưu điểm của Belief State Search. Partial State chậm hơn, tốn bộ nhớ, nhưng phù hợp với bài toán thực tế.
-Khả năng áp dụng: Full State chỉ phù hợp khi biết hết trạng thái, còn Partial State phù hợp với bài toán có thông tin không đầy đủ.
-
-Kết quả thực tế:
-
-## Ảnh kết quả
-
-Dưới đây là ảnh chụp giao diện GUI và kết quả của các thuật toán:
-
-Giao diện GUI:
-
-Biểu đồ so sánh số bước:
-
+Dự án có thể mở rộng bằng cách tối ưu hóa thuật toán, thêm hỗ trợ trạng thái lớn hơn, hoặc tích hợp học sâu.
 ## Hướng dẫn cài đặt và chạy
 
 - Cài đặt pygame: 'pip install pygame'
