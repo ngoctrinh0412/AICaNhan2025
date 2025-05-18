@@ -1,4 +1,7 @@
 # Báo cáo AI cá nhân: 8-Puzzle Solver
+## Họ và tên: Nguyễn Thị Ngọc Trinh
+## MSSV: 23133079
+## Lớp ARIN330585_05 xin chuyển qua lớp chiều thứ 5 (HKII 2024-2025)
 
 ## Mục tiêu
 
@@ -132,6 +135,8 @@ Các thuật toán được thử nghiệm với trạng thái ban đầu và m�
 
 ![Simulated Annealing Animation](assets/sa.gif)
 
+**Hình ảnh so sánh hiệu suất của các thuật toán:**
+
 ![So sánh hiệu suất Tìm kiếm cục bộ](assets/performance_comparison_tìm_kiếm_cục_bộ.png)
 
 **Nhận xét về hiệu suất:**
@@ -163,6 +168,8 @@ Các thuật toán được thử nghiệm với trạng thái ban đầu và m�
 #### Searching with Partial Observation
 
 ![Searching with Partial Observation Animation](assets/partialy.gif)
+
+**Hình ảnh so sánh hiệu suất của các thuật toán:**
 
 ![So sánh hiệu suất Môi trường phức tạp](assets/performance_comparison_môi_trường_phức_tạp.png)
 
@@ -198,6 +205,8 @@ Các thuật toán được thử nghiệm với trạng thái ban đầu và m�
 
 ![Maintaining Arc-Consistency Animation](assets/ac3.gif)
 
+**Hình ảnh so sánh hiệu suất của các thuật toán:**
+
 ![So sánh hiệu suất CSPs](assets/performance_comparison_csps.png)
 
 **Nhận xét về hiệu suất:**
@@ -218,6 +227,8 @@ Các thuật toán được thử nghiệm với trạng thái ban đầu và m�
 #### Q-Learning
 
 ![Q-Learning Animation](assets/q.gif)
+
+**Hình ảnh so sánh hiệu suất của các thuật toán:**
 
 ![So sánh hiệu suất Học tăng cường](assets/performance_comparison_học_tăng_cường.png)
 
