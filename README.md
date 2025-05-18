@@ -88,7 +88,7 @@ Các thuật toán được thử nghiệm với trạng thái ban đầu và m�
 
 #### IDA\*
 
-![IDA* Animation](assets/ida_star.gif)
+![IDA* Animation](assets/ida.gif)
 
 **Hình ảnh so sánh hiệu suất:**
 ![So sánh hiệu suất Tìm kiếm có thông tin](assets/performance_comparison_tìm_kiếm_có_thông_tin.png)
@@ -110,27 +110,27 @@ Các thuật toán được thử nghiệm với trạng thái ban đầu và m�
 
 #### Beam Search
 
-![Beam Search Animation](assets/beam_search.gif)
+![Beam Search Animation](assets/beam.gif)
 
 #### Simple Hill Climbing
 
-![Simple Hill Climbing Animation](assets/simple_hill_climbing.gif)
+![Simple Hill Climbing Animation](assets/simple.gif)
 
 #### Steepest-Ascent Hill Climbing
 
-![Steepest-Ascent Hill Climbing Animation](assets/steepest_ascent_hill_climbing.gif)
+![Steepest-Ascent Hill Climbing Animation](assets/steepest.gif)
 
 #### Stochastic Hill Climbing
 
-![Stochastic Hill Climbing Animation](assets/stochastic_hill_climbing.gif)
+![Stochastic Hill Climbing Animation](assets/stochastic.gif)
 
 #### Genetic Algorithm
 
-![Genetic Algorithm Animation](assets/genetic_algorithm.gif)
+![Genetic Algorithm Animation](assets/ga.gif)
 
 #### Simulated Annealing
 
-![Simulated Annealing Animation](assets/simulated_annealing.gif)
+![Simulated Annealing Animation](assets/sa.gif)
 
 ![So sánh hiệu suất Tìm kiếm cục bộ](assets/performance_comparison_tìm_kiếm_cục_bộ.png)
 
@@ -154,15 +154,15 @@ Các thuật toán được thử nghiệm với trạng thái ban đầu và m�
 
 #### AND-OR Search
 
-![AND-OR Search Animation](assets/and_or_search.gif)
+![AND-OR Search Animation](assets/andor.gif)
 
 #### Belief State Search
 
-![Belief State Search Animation](assets/belief_state_search.gif)
+![Belief State Search Animation](assets/belief.gif)
 
 #### Searching with Partial Observation
 
-![Searching with Partial Observation Animation](assets/searching_with_partial_observation.gif)
+![Searching with Partial Observation Animation](assets/partialy.gif)
 
 ![So sánh hiệu suất Môi trường phức tạp](assets/performance_comparison_môi_trường_phức_tạp.png)
 
@@ -176,26 +176,27 @@ Các thuật toán được thử nghiệm với trạng thái ban đầu và m�
 
 **Các thành phần chính của bài toán tìm kiếm và solution**
 
--Thành phần chính:
+- Thành phần chính:
 
-- Biến: Các ô trên lưới 3x3.
-- Miền giá trị: Các số từ 0-8.
-- Ràng buộc: Mỗi số phải duy nhất (uniqueness constraint).
-  -Solution: Đường đi từ trạng thái ban đầu đến mục tiêu, thỏa mãn tất cả ràng buộc.
+  - Biến: Các ô trên lưới 3x3.
+  - Miền giá trị: Các số từ 0-8.
+  - Ràng buộc: Mỗi số phải duy nhất (uniqueness constraint).
+
+- Solution: Đường đi từ trạng thái ban đầu đến mục tiêu, thỏa mãn tất cả ràng buộc.
 
 **Hình ảnh GIF và so sánh hiệu suất:**
 
 #### Backtracking Search
 
-![Backtracking Search Animation](assets/backtracking_search.gif)
+![Backtracking Search Animation](assets/backtrack.gif)
 
 #### Backtracking with Forward Checking
 
-![Backtracking with Forward Checking Animation](assets/backtracking_with_forward_checking.gif)
+![Backtracking with Forward Checking Animation](assets/fc.gif)
 
 #### Maintaining Arc-Consistency
 
-![Maintaining Arc-Consistency Animation](assets/maintaining_arc_consistency.gif)
+![Maintaining Arc-Consistency Animation](assets/ac3.gif)
 
 ![So sánh hiệu suất CSPs](assets/performance_comparison_csps.png)
 
@@ -216,7 +217,7 @@ Các thuật toán được thử nghiệm với trạng thái ban đầu và m�
 
 #### Q-Learning
 
-![Q-Learning Animation](assets/q_learning.gif)
+![Q-Learning Animation](assets/q.gif)
 
 ![So sánh hiệu suất Học tăng cường](assets/performance_comparison_học_tăng_cường.png)
 
